@@ -199,8 +199,6 @@ Full interactive docs available at `http://localhost:8000/docs` (Swagger UI).
 
 ## Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for the full 7-phase development plan.
-
 **Current status**: Alpha (Phase 1-6 complete). Core ingestion, feature extraction, ML scoring, REST API, dashboard, VS Code plugin, and GitHub Action are all functional.
 
 ## Contributing
