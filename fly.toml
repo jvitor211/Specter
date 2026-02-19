@@ -7,6 +7,8 @@ app = 'specter-a-rhva'
 primary_region = 'iad'
 
 [build]
+  dockerfile = "Dockerfile"
+  target = "api"
 
 [http_service]
   internal_port = 8000
