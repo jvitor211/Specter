@@ -1,6 +1,9 @@
 import { Sidebar } from "@/components/sidebar";
 import { TierProvider } from "@/lib/tier-context";
 
+// Paginas do app usam useSearchParams/localStorage — nao prerender estatico (Vercel)
+export const dynamic = "force-dynamic";
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <TierProvider>
