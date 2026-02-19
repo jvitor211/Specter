@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Key,
   Copy,
@@ -21,6 +22,7 @@ import {
   obterUso,
   criarChave,
   upgradarTier,
+  obterPortalStripe,
   type UsoAPI,
 } from "@/lib/api";
 import { useTier } from "@/lib/tier-context";
@@ -60,6 +62,7 @@ export default function SettingsPage() {
   const [upgrading, setUpgrading] = useState(false);
 
   const { recarregar: recarregarTier } = useTier();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const key = obterApiKey();
@@ -67,7 +70,17 @@ export default function SettingsPage() {
       setApiKey(key);
       carregarUso();
     }
-  }, []);
+
+    const checkout = searchParams.get("checkout");
+    if (checkout === "success") {
+      setMensagem("Pagamento confirmado! Seu plano Pro esta ativo.");
+      recarregarTier();
+      setTimeout(() => setMensagem(""), 6000);
+    } else if (checkout === "cancel") {
+      setMensagem("Checkout cancelado. Nenhuma cobranca realizada.");
+      setTimeout(() => setMensagem(""), 4000);
+    }
+  }, [searchParams]);
 
   async function carregarUso() {
     try {
@@ -122,14 +135,33 @@ export default function SettingsPage() {
     }
   }
 
-  async function handleUpgrade(novoTier: string) {
+  async function handleUpgrade(novoTier: string, plan = "pro_monthly") {
     setUpgrading(true);
     try {
-      const res = await upgradarTier(novoTier);
+      const res = await upgradarTier(novoTier, plan);
+
+      if (res.checkout_url) {
+        window.location.href = res.checkout_url;
+        return;
+      }
+
       setMensagem(res.message);
       setTimeout(() => setMensagem(""), 4000);
       await carregarUso();
       await recarregarTier();
+    } catch (err: any) {
+      setMensagem(`Erro: ${err.message}`);
+      setTimeout(() => setMensagem(""), 4000);
+    } finally {
+      setUpgrading(false);
+    }
+  }
+
+  async function handleGerenciarAssinatura() {
+    setUpgrading(true);
+    try {
+      const res = await obterPortalStripe();
+      window.location.href = res.portal_url;
     } catch (err: any) {
       setMensagem(`Erro: ${err.message}`);
       setTimeout(() => setMensagem(""), 4000);
@@ -399,42 +431,66 @@ export default function SettingsPage() {
             <p className="font-titulo font-bold text-lg">$0</p>
             <p className="text-texto-muted text-xs">para sempre</p>
           </div>
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <p className="font-titulo font-bold text-lg text-accent">
               $49<span className="text-sm font-normal text-texto-muted">/dev</span>
             </p>
             <p className="text-texto-muted text-xs">por mes</p>
             {uso && uso.tier === "free" && (
-              <button
-                onClick={() => handleUpgrade("pro")}
-                disabled={upgrading}
-                className="btn-primary mt-2 text-xs w-full"
-              >
-                {upgrading ? "Processando..." : "Upgrade para Pro"}
-              </button>
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => handleUpgrade("pro", "pro_monthly")}
+                  disabled={upgrading}
+                  className="btn-primary text-xs w-full"
+                >
+                  {upgrading ? "Redirecionando..." : "Assinar Mensal"}
+                </button>
+                <button
+                  onClick={() => handleUpgrade("pro", "pro_yearly")}
+                  disabled={upgrading}
+                  className="btn-ghost text-xs w-full border border-accent/30 text-accent hover:bg-accent/10"
+                >
+                  Anual (-20%)
+                </button>
+              </div>
             )}
             {uso && uso.tier === "pro" && (
-              <p className="mt-2 text-xs text-accent font-mono">Plano atual</p>
+              <div className="space-y-1.5">
+                <p className="text-xs text-accent font-mono">Plano atual</p>
+                <button
+                  onClick={handleGerenciarAssinatura}
+                  disabled={upgrading}
+                  className="btn-ghost text-xs w-full border border-borda"
+                >
+                  Gerenciar Assinatura
+                </button>
+              </div>
             )}
           </div>
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <p className="font-titulo font-bold text-lg text-purple-400">
               Custom
             </p>
             <p className="text-texto-muted text-xs">sob consulta</p>
             {uso && uso.tier !== "enterprise" && (
-              <button
-                onClick={() => handleUpgrade("enterprise")}
-                disabled={upgrading}
-                className="btn-ghost mt-2 text-xs w-full border border-borda"
+              <a
+                href="mailto:sales@specter.dev"
+                className="btn-ghost mt-2 text-xs w-full border border-borda inline-block text-center py-2"
               >
                 Falar com Vendas
-              </button>
+              </a>
             )}
             {uso && uso.tier === "enterprise" && (
-              <p className="mt-2 text-xs text-purple-400 font-mono">
-                Plano atual
-              </p>
+              <div className="space-y-1.5">
+                <p className="text-xs text-purple-400 font-mono">Plano atual</p>
+                <button
+                  onClick={handleGerenciarAssinatura}
+                  disabled={upgrading}
+                  className="btn-ghost text-xs w-full border border-borda"
+                >
+                  Gerenciar Assinatura
+                </button>
+              </div>
             )}
           </div>
         </div>

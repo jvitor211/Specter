@@ -146,13 +146,33 @@ export async function criarChave(
   });
 }
 
+export interface UpgradeResponse {
+  tier: string;
+  message: string;
+  checkout_url: string | null;
+}
+
 export async function upgradarTier(
-  tier: string
-): Promise<{ tier: string; message: string }> {
+  tier: string,
+  plan: string = "pro_monthly"
+): Promise<UpgradeResponse> {
   return fetchAPI("/v1/keys/upgrade", {
     method: "POST",
-    body: JSON.stringify({ tier }),
+    body: JSON.stringify({ tier, plan }),
   });
+}
+
+export async function criarCheckoutStripe(
+  plan: string = "pro_monthly"
+): Promise<{ checkout_url: string; session_id: string }> {
+  return fetchAPI("/v1/stripe/checkout", {
+    method: "POST",
+    body: JSON.stringify({ plan }),
+  });
+}
+
+export async function obterPortalStripe(): Promise<{ portal_url: string }> {
+  return fetchAPI("/v1/stripe/portal");
 }
 
 export async function enviarFeedback(dados: {

@@ -52,6 +52,13 @@ class Configuracao:
         "CORS_ORIGINS", "http://localhost:3000"
     ).split(",")
 
+    # --- Stripe ---
+    STRIPE_SECRET_KEY: str | None = os.getenv("STRIPE_SECRET_KEY")
+    STRIPE_WEBHOOK_SECRET: str | None = os.getenv("STRIPE_WEBHOOK_SECRET")
+    STRIPE_PRICE_PRO_MONTHLY: str | None = os.getenv("STRIPE_PRICE_PRO_MONTHLY")
+    STRIPE_PRICE_PRO_YEARLY: str | None = os.getenv("STRIPE_PRICE_PRO_YEARLY")
+    DASHBOARD_URL: str = os.getenv("DASHBOARD_URL", "http://localhost:3000")
+
     # --- Logging ---
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
 

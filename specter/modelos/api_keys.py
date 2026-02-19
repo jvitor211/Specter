@@ -24,6 +24,12 @@ class ChaveAPI(Base):
     email: Mapped[str] = mapped_column(String(255), nullable=False)
     tier: Mapped[str] = mapped_column(String(20), nullable=False, default="free")
     requisicoes_mes: Mapped[int] = mapped_column(Integer, default=0)
+    stripe_customer_id: Mapped[str | None] = mapped_column(
+        String(255), nullable=True, unique=True
+    )
+    stripe_subscription_id: Mapped[str | None] = mapped_column(
+        String(255), nullable=True
+    )
     criado_em: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )

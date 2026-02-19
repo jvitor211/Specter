@@ -68,14 +68,13 @@ async def criar_chave(body: RequestCriarChave):
 
 class RequestUpgrade(BaseModel):
     tier: str
+    plan: str = "pro_monthly"
 
 
 class ResponseUpgrade(BaseModel):
     tier: str
     message: str
-
-
-_TIERS_VALIDOS = {"free", "pro", "enterprise"}
+    checkout_url: str | None = None
 
 
 @router.post("/upgrade", response_model=ResponseUpgrade)
@@ -84,38 +83,58 @@ async def upgrade_tier(
     chave: ChaveAPI = Depends(dependencia_api_key),
 ):
     """
-    Simula upgrade de tier (em producao sera via Stripe webhook).
-    Aceita 'pro' ou 'enterprise'. Protegido por API key.
+    Upgrade de tier. Para Pro, redireciona ao Stripe Checkout.
+    Enterprise = contato comercial.
     """
-    if body.tier not in _TIERS_VALIDOS:
+    if body.tier == "enterprise":
+        return ResponseUpgrade(
+            tier="enterprise",
+            message="Entre em contato: sales@specter.dev",
+            checkout_url=None,
+        )
+
+    if body.tier != "pro":
         raise HTTPException(
             status_code=400,
-            detail=f"Tier invalido. Opcoes: {', '.join(sorted(_TIERS_VALIDOS))}",
+            detail="Tier invalido. Use 'pro' ou 'enterprise'.",
         )
 
-    sessao = obter_sessao()
-    try:
-        registro = sessao.get(ChaveAPI, chave.id)
-        if not registro:
-            raise HTTPException(status_code=404, detail="Chave nao encontrada")
-
-        registro.tier = body.tier
-        sessao.commit()
-
-        log.info("tier_upgrade", email=registro.email, novo_tier=body.tier)
-
+    if chave.tier in ("pro", "enterprise"):
         return ResponseUpgrade(
-            tier=body.tier,
-            message=f"Tier atualizado para '{body.tier}' com sucesso.",
+            tier=chave.tier,
+            message=f"Voce ja possui o plano {chave.tier}.",
+            checkout_url=None,
         )
-    except HTTPException:
+
+    from specter.api.rotas.stripe_billing import criar_checkout, RequestCheckout
+
+    try:
+        checkout_body = RequestCheckout(plan=body.plan)
+        resultado = await criar_checkout(checkout_body, chave)
+        return ResponseUpgrade(
+            tier="pro",
+            message="Redirecionando para pagamento...",
+            checkout_url=resultado.checkout_url,
+        )
+    except HTTPException as e:
+        if e.status_code == 503:
+            sessao = obter_sessao()
+            try:
+                registro = sessao.get(ChaveAPI, chave.id)
+                if registro:
+                    registro.tier = body.tier
+                    sessao.commit()
+                    log.info("tier_upgrade_fallback", email=registro.email, novo_tier=body.tier)
+                    return ResponseUpgrade(
+                        tier=body.tier,
+                        message=f"Tier atualizado para '{body.tier}' (Stripe offline, upgrade cortesia).",
+                        checkout_url=None,
+                    )
+            except Exception:
+                sessao.rollback()
+            finally:
+                sessao.close()
         raise
-    except Exception as e:
-        sessao.rollback()
-        log.error("upgrade_erro", erro=str(e))
-        raise HTTPException(status_code=500, detail="Erro ao atualizar tier")
-    finally:
-        sessao.close()
 
 
 @router.get("/usage", response_model=ResponseUso)

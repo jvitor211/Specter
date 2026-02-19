@@ -23,6 +23,7 @@ from specter.api.rotas.pacotes import router as pacotes_router
 from specter.api.rotas.feedback import router as feedback_router
 from specter.api.rotas.keys import router as keys_router
 from specter.api.rotas.stats import router as stats_router
+from specter.api.rotas.stripe_billing import router as stripe_router
 
 
 @asynccontextmanager
@@ -51,6 +52,7 @@ app.include_router(pacotes_router, prefix="/v1", tags=["pacotes"])
 app.include_router(feedback_router, prefix="/v1", tags=["feedback"])
 app.include_router(keys_router, prefix="/v1/keys", tags=["keys"])
 app.include_router(stats_router, prefix="/v1", tags=["stats"])
+app.include_router(stripe_router, prefix="/v1/stripe", tags=["stripe"])
 
 
 @app.get("/v1/health")
