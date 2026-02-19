@@ -1,0 +1,96 @@
+{
+  "name": "specter-security",
+  "displayName": "Specter Security",
+  "description": "Detecção de pacotes maliciosos em supply chain",
+  "version": "0.1.0",
+  "publisher": "specter",
+  "icon": "images/icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/specter-security/specter"
+  },
+  "homepage": "https://github.com/specter-security/specter#readme",
+  "bugs": {
+    "url": "https://github.com/specter-security/specter/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Security"
+  ],
+  "activationEvents": [
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:python"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "specter.scanAll",
+        "title": "Specter: Scan All Dependencies"
+      },
+      {
+        "command": "specter.showOutput",
+        "title": "Specter: Abrir painel de saída"
+      }
+    ],
+    "configuration": {
+      "title": "Specter Security",
+      "properties": {
+        "specter.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Chave API do Specter (formato spk_live_...)",
+          "order": 1
+        },
+        "specter.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "URL base da API Specter",
+          "order": 2
+        },
+        "specter.riskThreshold": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Limiar de risco para sinalização (0-1)",
+          "order": 3
+        },
+        "specter.autoScan": {
+          "type": "boolean",
+          "default": true,
+          "description": "Escaneamento automático ao salvar arquivos de dependências",
+          "order": 4
+        }
+      }
+    },
+    "languages": [
+      {
+        "id": "json",
+        "extensions": [".json"],
+        "filenames": ["package.json"]
+      },
+      {
+        "id": "pip-requirements",
+        "extensions": [".txt"],
+        "filenames": ["requirements.txt"]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

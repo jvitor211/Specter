@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ambiente
+.env
+*.env.local
+
+# Dados e modelos (pesados)
+models/*.joblib
+data/*.parquet
+data/top_500_npm.json
+threat_report_data.json
+
+# Celery beat schedule
+celerybeat-schedule
+celerybeat-schedule.*
+
+# Node
+node_modules/
+
+# Next.js
+dashboard/.next/
+dashboard/out/
+
+# VS Code plugin build
+vscode-plugin/specter-security/out/
+*.vsix
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Alembic
+migrations/versions/*.pyc
+
+# Logs
+*.log
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/

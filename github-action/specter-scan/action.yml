@@ -1,0 +1,38 @@
+# Manifest da GitHub Action Specter Security Scan
+# Escaneia dependencias em busca de pacotes maliciosos via API Specter
+
+name: 'Specter Security Scan'
+description: 'Escaneia dependencias em busca de pacotes maliciosos'
+
+inputs:
+  api_key:
+    description: 'API key do Specter (header X-Specter-Key)'
+    required: true
+  risk_threshold:
+    description: 'Score minimo para considerar pacote como risco (0.0 a 1.0)'
+    required: false
+    default: '0.5'
+  ecosystems:
+    description: 'Ecossistemas a escanear, separados por virgula (npm,pypi)'
+    required: false
+    default: 'npm,pypi'
+  fail_on_review:
+    description: 'Falhar o check quando pacote tiver verdict "review"'
+    required: false
+    default: 'false'
+  comment_on_pr:
+    description: 'Comentar resultados na PR em formato markdown'
+    required: false
+    default: 'true'
+
+outputs:
+  packages_scanned:
+    description: 'Numero total de pacotes escaneados'
+  packages_flagged:
+    description: 'Numero de pacotes sinalizados como risco'
+  report_url:
+    description: 'URL do relatorio (quando disponivel)'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
