@@ -55,6 +55,12 @@ app.include_router(stats_router, prefix="/v1", tags=["stats"])
 app.include_router(stripe_router, prefix="/v1/stripe", tags=["stripe"])
 
 
+@app.get("/")
+async def root():
+    """Rota raiz — redireciona para health."""
+    return {"service": "specter-api", "docs": "/docs", "health": "/v1/health"}
+
+
 @app.get("/v1/health")
 async def health():
     """Status da API, versao do modelo, ultima atualizacao."""
