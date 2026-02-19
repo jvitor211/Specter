@@ -1,0 +1,17 @@
+.venv
+.env
+*.pyc
+__pycache__
+.git
+.github
+dashboard
+vscode-plugin
+github-action
+node_modules
+*.vsix
+*.log
+celerybeat-schedule*
+data/*
+models/*.joblib
+.next
+out
