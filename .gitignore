@@ -22,6 +22,9 @@ env/
 .env
 *.env.local
 
+# Documentos internos (nao publicar)
+BUSINESS_MODEL.md
+
 # Dados e modelos (pesados)
 models/*.joblib
 data/*.parquet
